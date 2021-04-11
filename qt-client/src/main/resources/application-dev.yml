@@ -1,6 +1,6 @@
 server:
   port: 8024
-  address: 0.0.0.0
+  address: 127.0.0.1
 eureka:
   client:
     serviceUrl:
@@ -18,9 +18,9 @@ spring:
 #    password: ${RABBIT_MQ_PASSWORD:yang}
   redis:
     database: 0
-    host: 127.0.0.1
-    port: 6379
-    password:
+    host: 139.9.225.131
+    port: 3550
+    password: hermanredis
     jedis:
       pool:
         max-active: 8
@@ -39,7 +39,7 @@ management:
         include: '*'
       base-path: /
 vpnproxy:
-  enable: true
+  enable: false
   ip: 127.0.0.1
   port: 1088
 

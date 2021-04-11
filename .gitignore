@@ -25,5 +25,13 @@ HELP.md
 /.nb-gradle/
 /build/
 
+/qt-admin/target
+/qt-client/target
+/qt-register/target
+/qt-common/target
+/qt-core/target
+
+
+
 ### VS Code ###
 .vscode/

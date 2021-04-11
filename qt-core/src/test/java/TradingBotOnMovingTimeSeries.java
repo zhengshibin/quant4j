@@ -53,9 +53,9 @@
 //     * @param maxBarCount the number of bars to keep in the time series (at maximum)
 //     * @return a moving time series
 //     */
-//    private static TimeSeries initMovingTimeSeries(int maxBarCount) {
+//    private static BarSeries initMovingTimeSeries(int maxBarCount) {
 //        kline = Main.getKline("15min","2000");
-//        TimeSeries series = Main.loadTimeSeries(kline);
+//        BarSeries series = Main.loadTimeSeries(kline);
 //
 //        System.out.print("Initial bar count: " + series.getBarCount());
 //        // Limitating the number of bars to maxBarCount
@@ -69,7 +69,7 @@
 //     * @param series a time series
 //     * @return a dummy strategy
 //     */
-//    private static Strategy buildStrategy(TimeSeries series) {
+//    private static Strategy buildStrategy(BarSeries series) {
 //        if (series == null) {
 //            throw new IllegalArgumentException("Series cannot be null");
 //        }
@@ -123,7 +123,7 @@
 //
 //        System.out.println("********************** Initialization **********************");
 //        // Getting the time series
-//        TimeSeries series = initMovingTimeSeries(2000);
+//        BarSeries series = initMovingTimeSeries(2000);
 //
 //        // Building the trading strategy
 //        Strategy strategy = buildStrategy(series);

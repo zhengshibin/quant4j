@@ -103,6 +103,7 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
         this.tradingApi = builder.getTradingApi();
         this.marketConfig = builder.getMarketConfig();
         this.accountConfig = builder.getAccountConfig();
+        this.strategyConfig = builder.getStrategyConfig();
         this.redisUtil = builder.getRedisUtil();
         this.robotId = builder.getRobotStrategyVo().getRobotId();
         final StrategyConfig config = builder.getStrategyConfig();
