@@ -1,6 +1,7 @@
 package com.quant.core.strategy.handle;
 
 import com.quant.common.domain.entity.MarketOrder;
+import com.quant.common.domain.response.TradeBean;
 import com.quant.common.domain.vo.BaseInfoEntity;
 import com.quant.common.enums.HBOrderType;
 import com.quant.common.enums.PirceType;
@@ -13,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * 火币限价
@@ -39,18 +42,28 @@ public class HuobiLimitBuyPriceHandle extends StrategyHandle {
             return null;
         }
 
-        final BaseInfoEntity baseInfo = config.getIndicatorStrategy().getBaseInfo();
+        final BaseInfoEntity baseInfo;
+        if(config.getIndicatorStrategy() == null){
+            baseInfo = config.getStrategyVo().getBaseInfo();
+        }else{
+            baseInfo = config.getIndicatorStrategy().getBaseInfo();
+        }
         if (baseInfo.getIsLimitPrice() == PirceType.isLimit.getType()) {
             //从当前的20个卖出订单里找出最优的价格 （限价卖出）
             final MarketOrder marketOrder = tradingApi.getMarketOrders(marketConfig, "500");
-            final BigDecimal currentBuyPrice = marketOrder.getBuy().get(0).getPrice();
+            //final BigDecimal currentBuyPrice = marketOrder.getBuy().get(0).getPrice();
+            List<TradeBean> buys = marketOrder.getBuy();
+            buys.sort(Comparator.comparing(TradeBean::getPrice));
+            final BigDecimal currentBuyPrice = buys.get(0).getPrice();
+            log.info("当前市场购买价格："+currentBuyPrice.doubleValue());
             //计算卖出的价格
             final BigDecimal buyPrice = baseInfo.getBuyPrice().add(currentBuyPrice).setScale(pricePrecision, RoundingMode.UP);
+            log.info("当前购买价格："+buyPrice.doubleValue());
             //计算购买的数量 是否全部卖出
             BigDecimal buyAmount = BigDecimal.ZERO;
             if (baseInfo.getIsAllSell() == SellType.sellAll.getType()) {
                 //从用户api的表里查询到他的账户相应的base 火币的数量全部购买
-                buyAmount = buyAmount.add(baseBalance).setScale(amountPrecision, RoundingMode.DOWN);
+                buyAmount = buyAmount.add(new BigDecimal(baseBalance.doubleValue() / buyPrice.doubleValue())).setScale(amountPrecision, RoundingMode.DOWN);
             } else {
                 buyAmount = buyAmount.add(baseInfo.getSellAmount().setScale(amountPrecision, RoundingMode.DOWN));
             }

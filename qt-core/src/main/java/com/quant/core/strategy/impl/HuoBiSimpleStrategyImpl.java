@@ -539,7 +539,7 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
         }
         //是否是限价
         StrategyHandle strategyHandle = new HuobiLimitBuyPriceHandle(new HuobiNotLimitBuyPriceHandle(null));
-        StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, baseBalance);
+        StrategyHandle.HandleResult handleResult = strategyHandle.strategyRequest(tradingApi, marketConfig, strategyConfig, accountConfig, pricePrecision, amountPrecision, quotaBalance);
         setHandleResult(handleResult);
         handleResultForBuy(this);
     }
@@ -1126,13 +1126,14 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
             Optional<TradeBean> res = marketOrder.getBuy()
                     .stream()
                     .limit(20)
-                    .filter(m -> m.getPrice().compareTo(config.getBuyOrdersUsdt()) > 0)
+                    //.filter(m -> m.getPrice().compareTo(config.getBuyOrdersUsdt()) > 0)
+                    .filter(m -> config.getBuyOrdersUsdt().compareTo(m.getPrice()) > 0)
                     .findFirst();
             if (res.isPresent()) {
-                redisMqService.sendMsg("策略1：前20位购买订单中出现价格" + res.get().getPrice() + " [大于] 策略1 配置的价格" + config.getBuyOrdersUsdt());
+                redisMqService.sendMsg("策略1：前20位购买订单中出现价格" + res.get().getPrice() + " [小于] 策略1 配置的价格" + config.getBuyOrdersUsdt());
                 return true;
             }
-            redisMqService.sendMsg("策略1：前20位购买订单中未出现大于策略1配置的价格" + config.getBuyOrdersUsdt() + "策略1不生效!");
+            redisMqService.sendMsg("策略1：前20位购买订单中未出现小于策略1配置的价格" + config.getBuyOrdersUsdt() + "策略1不生效!");
             return false;
         }
         return false;
@@ -1171,12 +1172,13 @@ public class HuoBiSimpleStrategyImpl extends AbstractStrategy implements Trading
     public Boolean setting2BuyCalculation(MarketOrder marketOrder, StrategyVo.Setting2Entity config) {
         if (marketOrder != null && !marketOrder.getBuy().isEmpty()) {
             this.currentNewBuyPrice = marketOrder.getBuy().get(0).getPrice();
-            if (currentNewBuyPrice.compareTo(config.getBuyOrderUsdt()) > 0) {
-                redisMqService.sendMsg("策略2：当前最新购买订单价格" + currentNewBuyPrice + "超过策略2配置的价格:" + config.getBuyOrderUsdt() + ",策略2权重生效！！！");
+            //if (currentNewBuyPrice.compareTo(config.getBuyOrderUsdt()) > 0) {
+            if (config.getBuyOrderUsdt().compareTo(currentNewBuyPrice) > 0) {
+                redisMqService.sendMsg("策略2：当前最新购买订单价格" + currentNewBuyPrice + "低于策略2配置的价格:" + config.getBuyOrderUsdt() + ",策略2权重生效！！！");
                 return true;
             }
         }
-        redisMqService.sendMsg("策略2：当前最新购买订单价格:" + currentNewBuyPrice + "未超过策略2的价格" + config.getBuyOrderUsdt() + ",策略2权重不生效！！！");
+        redisMqService.sendMsg("策略2：当前最新购买订单价格:" + currentNewBuyPrice + "未低于策略2的价格" + config.getBuyOrderUsdt() + ",策略2权重不生效！！！");
         return false;
     }
 
